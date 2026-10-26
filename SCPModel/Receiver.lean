@@ -2,6 +2,8 @@ import SCPModel.Types
 
 namespace SCPModular.Receiver
 
+variable {α : Type}
+
 /-- 受信側の状態 -/
 structure State (α : Type) where
   expected : Bool -- 期待する bit
@@ -9,15 +11,15 @@ structure State (α : Type) where
   deriving Repr, DecidableEq
 
 /-- 初期状態 -/
-def initial {α : Type} : State α := ⟨false, []⟩
+def initial : State α := ⟨false, []⟩
 
 /-- データ受信 : 期待ビットと一致するデータを受理し、期待ビットを反転 -/
-def onData {α : Type} (s : State α) (p : Packet α) : State α :=
+def onData  (s : State α) (p : Packet α) : State α :=
   if p.bit = s.expected then ⟨!s.expected, s.output ++ [p.payload]⟩ -- 期待ビットと一致する場合は受理
   else s
 
 /-- Ack 送信 : 期待ビットを送信 -/
-def emitAck {α : Type} (s : State α) : Bool := s.expected
+def emitAck (s : State α) : Bool := s.expected
 
 
 end SCPModular.Receiver

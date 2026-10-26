@@ -1,0 +1,13 @@
+{
+  "challenge_module": "SCPChallenge.Verification",
+  "solution_module": "SCPProofs.Verification",
+  "theorem_names": [
+    "SCP.Checked.safety",
+    "SCP.Checked.completed"
+  ],
+  "permitted_axioms": [ 
+    "propext",
+    "Quot.sound",
+    "Classical.choice"
+  ]
+}

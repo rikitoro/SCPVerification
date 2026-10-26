@@ -47,13 +47,36 @@ def recvAck (s : State α) (b : Bool) : State α :=
     sender := Sender.onAck s.sender b
     network := { s.network with ackCell := none } }
 
-/-- データ損失 -/
+/-- データ消失 -/
 def dropData (s : State α): State α :=
   { s with network := { s.network with dataCell := none } }
 
-/-- Ack 損失 -/
+/-- Ack 消失 -/
 def dropAck (s : State α) : State α :=
   { s with network := { s.network with ackCell := none } }
+
+/-- Sender, Receiver の局所的動作を通信路に接続する規則 -/
+inductive Step : State α → State α → Prop where
+  | send {s : State α} {p : Packet α}
+    (produced : Sender.emit s.sender = some p) : Step s (sendData s p)
+  | recvData {s : State α} {p : Packet α}
+    (present : s.network.dataCell = some p) : Step s (recvData s p)
+  | sendAck (s : State α) : Step s (sendAck s)
+  | recvAck {s : State α} {b : Bool}
+    (present : s.network.ackCell = some b) : Step s (recvAck s b)
+  | loseData {s : State α} {p : Packet α}
+    (present : s.network.dataCell = some p) :  Step s (dropData s)
+  | loseAck {s : State α} {b : Bool}
+    (present : s.network.ackCell = some b) : Step s (dropAck s)
+  | idle (s : State α) : Step s s
+
+/-- 到達可能な状態 -/
+inductive Reachable (input : List α) : State α → Prop where
+  | init : Reachable input (initial input)
+  | next {s t : State α} : Reachable input s → Step s t → Reachable input t
+
+
+
 
 
 end SCPModular.System
