@@ -1,6 +1,6 @@
 import SCPModel.System
 
-namespace SPC.Checked
+namespace SCP.Checked
 
 variable {α : Type}
 
@@ -17,4 +17,4 @@ theorem completed
   s.receiver.output = input := by
   sorry
 
-end SPC.Checked
+end SCP.Checked
