@@ -93,6 +93,7 @@ theorem invariant_step {t : State α}
   cases hstep with grind
 
 /-- 初期状態から到達可能なすべての状態で不変条件が成り立つ -/
+@[grind .]
 theorem reachable_invariant
   (h : Reachable input s) :
   Invariant input s := by
