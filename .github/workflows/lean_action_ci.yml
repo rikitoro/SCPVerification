@@ -11,4 +11,20 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
-      - uses: leanprover/lean-action@v1
+
+      - name: Build Lean project
+        uses: leanprover/lean-action@v1
+
+      - name: Install bubblewrap
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bubblewrap
+
+      - name: Build challenge
+        run: lake build SCPChallenge
+
+      - name: Check proofs with Comparator
+        run: lake comparator
+
+      - name: Check proofs with Comparator (paranoid)
+        run: lake comparator --paranoid
