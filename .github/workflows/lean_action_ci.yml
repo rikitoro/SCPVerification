@@ -7,7 +7,10 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+
+    env:
+      COMPARATOR_BWRAP: /usr/local/bin/scp-ci-bwrap
 
     steps:
       - uses: actions/checkout@v7
@@ -15,10 +18,32 @@ jobs:
       - name: Build Lean project
         uses: leanprover/lean-action@v1
 
-      - name: Install bubblewrap
+      - name: Prepare Comparator sandbox
         run: |
           sudo apt-get update
-          sudo apt-get install -y bubblewrap
+          sudo apt-get install -y bubblewrap apparmor
+
+          sudo install -m 0755 /usr/bin/bwrap /usr/local/bin/scp-ci-bwrap
+
+          sudo tee /etc/apparmor.d/scp-ci-bwrap > /dev/null <<'EOF'
+          abi <abi/4.0>,
+          include <tunables/global>
+
+          profile scp-ci-bwrap /usr/local/bin/scp-ci-bwrap flags=(unconfined) {
+            userns,
+          }
+          EOF
+          sudo apparmor_parser -r /etc/apparmor.d/scp-ci-bwrap
+
+      - name: Check Comparator sandbox
+        run: |
+          "$COMPARATOR_BWRAP" \
+            --unshare-all \
+            --die-with-parent \
+            --ro-bind / / \
+            --proc /proc \
+            --dev /dev \
+            -- /usr/bin/true
 
       - name: Build challenge
         run: lake build SCPChallenge
