@@ -10,7 +10,7 @@ variable {α : Type}
 * ビットが同じときは受信済みの列とpendingを連結すると入力列になる
 * ビットが異なるときは受信済みの列と pending の先頭を除いた残りを連結すると入力列になる
 -/
-@[local grind]
+@[grind]
 def Progress (input : List α) (s : State α) : Prop :=
   (s.sender.bit = s.receiver.expected ∧ input = s.receiver.output ++ s.sender.pending) ∨ -- 受理されている状況
   (s.sender.bit ≠ s.receiver.expected ∧
@@ -21,7 +21,7 @@ def Progress (input : List α) (s : State α) : Prop :=
 格納されたパケットのビットが Receiver の期待ビット一致するなら
 送受信のビットは同じで、payload は pending の先頭である
 -/
-@[local grind]
+@[grind]
 def DataConsistent (s : State α) : Prop :=
   ∀ p : Packet α,
     s.network.dataCell = some p →
@@ -33,7 +33,7 @@ def DataConsistent (s : State α) : Prop :=
 格納された ACK が送信ビットと異なるなら、
 その値は Receiver が次に期待するビットと一致する
 -/
-@[local grind]
+@[grind]
 def AckConsistent (s : State α) : Prop :=
   ∀ b : Bool,
     s.network.ackCell = some b →
@@ -41,6 +41,7 @@ def AckConsistent (s : State α) : Prop :=
     b = s.receiver.expected
 
 /-- 進行状況と、Data, ACK 通信路の整合性をまとめたシステムの不変条件 -/
+@[grind]
 structure Invariant (input : List α) (s : State α) : Prop where
   progress  : Progress input s
   data      : DataConsistent s
@@ -63,6 +64,7 @@ theorem progress_of_bit_eq
   grind only [Progress]
 
 /-- ビットが異なる段階では、pending の先頭を除いた列が残りとなる -/
+@[grind .]
 theorem progress_of_bit_ne
   (h : Invariant input s)
   (hbit : s.sender.bit ≠ s.receiver.expected) :
@@ -73,6 +75,7 @@ theorem progress_of_bit_ne
     grind only [Progress]
 
 /-- スロット内の受理可能なパケットについての送信側との対応 -/
+@[grind .]
 theorem data_spec
   (h : Invariant input s)
   {p : Packet α}
@@ -83,6 +86,7 @@ theorem data_spec
   grind [h.data]
 
 /-- スロット内の ACK が送信ビットと異なる場合、その値は期待ビットと一致する -/
+@[grind .]
 theorem ack_spec
   (h : Invariant input s)
   {b : Bool}
@@ -95,6 +99,7 @@ theorem ack_spec
 /-! ## 最終課題につながる補題 -/
 
 /-- 不変条件を満たすとき、受理済みの列は入力列の prefix である -/
+@[grind .]
 theorem output_prefix
   (h : Invariant input s) :
   ∃ rest, input = s.receiver.output ++ rest := by
@@ -103,6 +108,7 @@ theorem output_prefix
   · grind only [h.progress_of_bit_ne hbit]
 
 /-- 不変条件を満たし pending が空なら、受信済みの列は入力列全体と一致する -/
+@[grind .]
 theorem output_eq_input_of_pending_nil
   (h : Invariant input s)
   (hempty : s.sender.pending = []) :
